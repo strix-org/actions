@@ -27,6 +27,10 @@ inputs:
   size-bytes:
     required: true
     description: 'File size in bytes'
+  channel:
+    required: false
+    default: ''
+    description: 'Release channel, e.g. stable, beta'
   license-type:
     required: false
     default: ''

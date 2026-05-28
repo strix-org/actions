@@ -51,6 +51,9 @@ async function main() {
     size_bytes: parseInt(core.getInput('size-bytes', { required: true }), 10),
   };
 
+  const channel = core.getInput('channel');
+  if (channel) payload.channel = channel;
+
   const licenseType = core.getInput('license-type');
   if (licenseType) payload.license_type = licenseType;
   else payload.license_type = null;
