@@ -1,0 +1,45 @@
+name: 'Register Artifact'
+description: 'Register a built artifact in a backend service via HTTP POST'
+
+inputs:
+  backend-url:
+    required: true
+    description: 'Base URL of the backend, e.g. https://example.com'
+  token:
+    required: true
+    description: 'Bearer token for authorization'
+  endpoint:
+    required: false
+    default: '/api/admin/artifacts/register'
+    description: 'API endpoint path'
+  artifact-type:
+    required: true
+    description: 'Artifact type string passed to the backend'
+  version:
+    required: true
+    description: 'Artifact version string'
+  s3-key:
+    required: true
+    description: 'S3 object key where the artifact was uploaded'
+  sha256:
+    required: true
+    description: 'SHA-256 hex digest of the artifact file'
+  size-bytes:
+    required: true
+    description: 'File size in bytes'
+  license-type:
+    required: false
+    default: ''
+    description: 'Optional license type label'
+  native-key:
+    required: false
+    default: ''
+    description: 'Optional native key'
+  run-url:
+    required: false
+    default: ''
+    description: 'URL to the CI run that produced this artifact'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

@@ -1,0 +1,68 @@
+name: 'Notify Telegram'
+description: 'Send a build notification to a Telegram chat'
+
+inputs:
+  bot-token:
+    required: true
+    description: 'Telegram bot token'
+  chat-id:
+    required: true
+    description: 'Telegram chat ID'
+  status:
+    required: true
+    description: '"success" or "failure" (or any other value treated as failure)'
+  title:
+    required: true
+    description: 'Short title shown after the status emoji'
+  details:
+    required: false
+    default: ''
+    description: 'Extra markdown lines appended after the standard fields'
+  actor:
+    required: false
+    default: ''
+    description: 'GitHub actor (defaults to GITHUB_ACTOR env var)'
+  run-number:
+    required: false
+    default: ''
+    description: 'Run number (defaults to GITHUB_RUN_NUMBER env var)'
+  run-url:
+    required: false
+    default: ''
+    description: 'Link to the CI run'
+
+runs:
+  using: composite
+  steps:
+    - name: Build message
+      id: msg
+      shell: bash
+      run: |
+        STATUS="${{ inputs.status }}"
+        EMOJI=$([[ "$STATUS" == "success" ]] && echo "✅" || echo "❌")
+        ACTOR="${{ inputs.actor }}"
+        [ -z "$ACTOR" ] && ACTOR="${GITHUB_ACTOR}"
+        RUN_NUM="${{ inputs.run-number }}"
+        [ -z "$RUN_NUM" ] && RUN_NUM="${GITHUB_RUN_NUMBER}"
+        RUN_URL="${{ inputs.run-url }}"
+
+        MSG="${EMOJI} ${{ inputs.title }}"$'\n'
+        MSG+=$'\n'
+        MSG+="👤 ${ACTOR}"$'\n'
+        MSG+="🔨 #${RUN_NUM}"$'\n'
+        [ -n "$RUN_URL" ] && MSG+="📊 ${RUN_URL}"$'\n'
+        DETAILS="${{ inputs.details }}"
+        [ -n "$DETAILS" ] && MSG+=$'\n'"${DETAILS}"
+
+        echo "message<<EOF" >> "$GITHUB_OUTPUT"
+        printf '%s' "$MSG" >> "$GITHUB_OUTPUT"
+        echo "" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+
+    - name: Send to Telegram
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ inputs.chat-id }}
+        token: ${{ inputs.bot-token }}
+        format: markdown
+        message: ${{ steps.msg.outputs.message }}

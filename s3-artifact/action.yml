@@ -1,0 +1,29 @@
+name: 'S3 Artifact'
+description: 'Upload or download build artifacts to/from S3-compatible storage'
+
+inputs:
+  operation:
+    required: true
+    description: '"upload" or "download"'
+  path:
+    required: true
+    description: 'Local path (directory or glob for upload; destination directory for download)'
+  s3-prefix:
+    required: true
+    description: 'S3 key prefix, e.g. ci-artifacts/my-build. When auto-prefix is true, {owner}/{repo}/{run_id}/ is prepended automatically.'
+  bucket:
+    required: true
+  endpoint:
+    required: true
+  exclude:
+    required: false
+    default: ''
+    description: 'Comma-separated glob patterns to exclude (upload only), e.g. "*-sources.jar,*-dev.jar"'
+  auto-prefix:
+    required: false
+    default: 'false'
+    description: 'When true, prepend {owner}/{repo}/{run_id}/ to s3-prefix to namespace per-repo per-run'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
