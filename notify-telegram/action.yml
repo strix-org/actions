@@ -37,6 +37,9 @@ runs:
     - name: Build message
       id: msg
       shell: bash
+      env:
+        INPUT_DETAILS: ${{ inputs.details }}
+        INPUT_TITLE: ${{ inputs.title }}
       run: |
         STATUS="${{ inputs.status }}"
         EMOJI=$([[ "$STATUS" == "success" ]] && echo "✅" || echo "❌")
@@ -49,15 +52,14 @@ runs:
         SHA="${GITHUB_SHA:-}"
         SHORT_SHA="${SHA:0:7}"
 
-        MSG="${EMOJI} ${{ inputs.title }}"$'\n'
+        MSG="${EMOJI} ${INPUT_TITLE}"$'\n'
         MSG+=$'\n'
         MSG+="👤 ${ACTOR}"$'\n'
         MSG+="🔨 #${RUN_NUM}"$'\n'
         [ -n "$BRANCH" ] && MSG+="🌿 \`${BRANCH}\`"$'\n'
         [ -n "$SHORT_SHA" ] && MSG+="🔗 \`${SHORT_SHA}\`"$'\n'
         [ -n "$RUN_URL" ] && MSG+="📊 ${RUN_URL}"$'\n'
-        DETAILS="${{ inputs.details }}"
-        [ -n "$DETAILS" ] && MSG+=$'\n'"${DETAILS}"
+        [ -n "$INPUT_DETAILS" ] && MSG+=$'\n'"${INPUT_DETAILS}"
 
         echo "message<<EOF" >> "$GITHUB_OUTPUT"
         printf '%s' "$MSG" >> "$GITHUB_OUTPUT"
