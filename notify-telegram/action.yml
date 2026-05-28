@@ -45,11 +45,16 @@ runs:
         RUN_NUM="${{ inputs.run-number }}"
         [ -z "$RUN_NUM" ] && RUN_NUM="${GITHUB_RUN_NUMBER}"
         RUN_URL="${{ inputs.run-url }}"
+        BRANCH="${GITHUB_REF_NAME:-}"
+        SHA="${GITHUB_SHA:-}"
+        SHORT_SHA="${SHA:0:7}"
 
         MSG="${EMOJI} ${{ inputs.title }}"$'\n'
         MSG+=$'\n'
         MSG+="👤 ${ACTOR}"$'\n'
         MSG+="🔨 #${RUN_NUM}"$'\n'
+        [ -n "$BRANCH" ] && MSG+="🌿 \`${BRANCH}\`"$'\n'
+        [ -n "$SHORT_SHA" ] && MSG+="🔗 \`${SHORT_SHA}\`"$'\n'
         [ -n "$RUN_URL" ] && MSG+="📊 ${RUN_URL}"$'\n'
         DETAILS="${{ inputs.details }}"
         [ -n "$DETAILS" ] && MSG+=$'\n'"${DETAILS}"
