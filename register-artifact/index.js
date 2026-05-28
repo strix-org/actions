@@ -64,7 +64,7 @@ async function main() {
   const runUrl = core.getInput('run-url');
   if (runUrl) payload.run_url = runUrl;
 
-  core.info(`Registering ${payload.artifact_type} v${payload.version} at ${backendUrl}`);
+  core.info(`Registering ${payload.artifact_type} ${payload.version} at ${backendUrl}`);
   core.info(`S3 key: ${payload.s3_key}`);
 
   const result = await post(`${backendUrl}${endpoint}`, token, payload);
