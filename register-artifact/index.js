@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const https = require('https');
 const http = require('http');
+const fs = require('fs');
 
 async function post(url, token, payload) {
   return new Promise((resolve, reject) => {
@@ -42,30 +43,37 @@ async function main() {
   const backendUrl = core.getInput('backend-url', { required: true }).replace(/\/$/, '');
   const token = core.getInput('token', { required: true });
   const endpoint = core.getInput('endpoint') || '/api/admin/artifacts/register';
+  const manifestPath = core.getInput('manifest');
 
-  const payload = {
-    artifact_type: core.getInput('artifact-type', { required: true }),
-    version: core.getInput('version', { required: true }),
-    s3_key: core.getInput('s3-key', { required: true }),
-    sha256: core.getInput('sha256', { required: true }),
-    size_bytes: parseInt(core.getInput('size-bytes', { required: true }), 10),
-  };
+  let payload;
+  if (manifestPath) {
+    payload = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    core.info(`Registering artifact set manifest ${manifestPath} at ${backendUrl}`);
+  } else {
+    payload = {
+      artifact_type: core.getInput('artifact-type', { required: true }),
+      version: core.getInput('version', { required: true }),
+      s3_key: core.getInput('s3-key', { required: true }),
+      sha256: core.getInput('sha256', { required: true }),
+      size_bytes: parseInt(core.getInput('size-bytes', { required: true }), 10),
+    };
 
-  const channel = core.getInput('channel');
-  if (channel) payload.channel = channel;
+    const channel = core.getInput('channel');
+    if (channel) payload.channel = channel;
 
-  const licenseType = core.getInput('license-type');
-  if (licenseType) payload.license_type = licenseType;
-  else payload.license_type = null;
+    const licenseType = core.getInput('license-type');
+    if (licenseType) payload.license_type = licenseType;
+    else payload.license_type = null;
 
-  const nativeKey = core.getInput('native-key');
-  if (nativeKey) payload.native_key = nativeKey;
+    const nativeKey = core.getInput('native-key');
+    if (nativeKey) payload.native_key = nativeKey;
 
-  const runUrl = core.getInput('run-url');
-  if (runUrl) payload.run_url = runUrl;
+    const runUrl = core.getInput('run-url');
+    if (runUrl) payload.run_url = runUrl;
 
-  core.info(`Registering ${payload.artifact_type} ${payload.version} at ${backendUrl}`);
-  core.info(`S3 key: ${payload.s3_key}`);
+    core.info(`Registering ${payload.artifact_type} ${payload.version} at ${backendUrl}`);
+    core.info(`S3 key: ${payload.s3_key}`);
+  }
 
   const result = await post(`${backendUrl}${endpoint}`, token, payload);
   core.info(`Registered: HTTP ${result.status}`);

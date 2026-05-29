@@ -12,20 +12,24 @@ inputs:
     required: false
     default: '/api/admin/artifacts/register'
     description: 'API endpoint path'
+  manifest:
+    required: false
+    default: ''
+    description: 'Path to artifact-set manifest JSON. When set, legacy artifact inputs are ignored.'
   artifact-type:
-    required: true
+    required: false
     description: 'Artifact type string passed to the backend'
   version:
-    required: true
+    required: false
     description: 'Artifact version string'
   s3-key:
-    required: true
+    required: false
     description: 'S3 object key where the artifact was uploaded'
   sha256:
-    required: true
+    required: false
     description: 'SHA-256 hex digest of the artifact file'
   size-bytes:
-    required: true
+    required: false
     description: 'File size in bytes'
   channel:
     required: false
