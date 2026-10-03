@@ -66,10 +66,20 @@ runs:
         echo "" >> "$GITHUB_OUTPUT"
         echo "EOF" >> "$GITHUB_OUTPUT"
 
+    # Прямой вызов Bot API вместо appleboy/telegram-action: тот Docker-based,
+    # а ARC-раннеры (hl) без dind контейнерные экшены не запускают. curl шлёт
+    # то же сообщение. Уведомление best-effort — ошибка API не роняет сборку.
     - name: Send to Telegram
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ inputs.chat-id }}
-        token: ${{ inputs.bot-token }}
-        format: markdown
-        message: ${{ steps.msg.outputs.message }}
+      shell: bash
+      env:
+        BOT_TOKEN: ${{ inputs.bot-token }}
+        CHAT_ID: ${{ inputs.chat-id }}
+        MSG: ${{ steps.msg.outputs.message }}
+      run: |
+        code=$(curl -sS -o /tmp/tg.out -w '%{http_code}' \
+          "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+          --data-urlencode "chat_id=${CHAT_ID}" \
+          --data-urlencode "text=${MSG}" \
+          --data-urlencode "parse_mode=Markdown" || echo 000)
+        echo "Telegram HTTP $code"
+        [ "$code" = 200 ] || echo "::warning::Telegram notify failed ($code): $(cat /tmp/tg.out 2>/dev/null)"
